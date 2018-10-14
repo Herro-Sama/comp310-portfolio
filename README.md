@@ -1,2 +1,2 @@
-# comp310-portfolio
-Base repository for COMP310 assignment 1
+# comp310-live-coding
+Repository to accompany live coding videos for COMP310 Legacy Game Systems
