@@ -47,7 +47,10 @@ temp_y             .rs 1
 enemy_info         .rs 4 * NUM_ENEMIES
 
     .rsset $0200
-sprite_player      .rs 4
+sprite_player1      .rs 4
+sprite_player2      .rs 4
+sprite_player3      .rs 4
+sprite_player4      .rs 4
 sprite_bullet      .rs 4
 sprite_enemy       .rs 4 * NUM_ENEMIES
 
@@ -153,26 +156,56 @@ InitialiseGame: ; Begin subroutine
     STA PPUADDR
 
     ; Write the background colour
-    LDA #$30
+    LDA #$37
     STA PPUDATA
 
     ; Write the palette colours
-    LDA #$17
+    LDA #$30
     STA PPUDATA
-    LDA #$1f
+    LDA #$06
     STA PPUDATA
-    LDA #$2c
+    LDA #$3D
     STA PPUDATA
 
     ; Write sprite data for sprite 0
     LDA #120    ; Y position
-    STA sprite_player + SPRITE_Y
+    STA sprite_player1 + SPRITE_Y
     LDA #0      ; Tile number
-    STA sprite_player + SPRITE_TILE
+    STA sprite_player1 + SPRITE_TILE
     LDA #0      ; Attributes
-    STA sprite_player + SPRITE_ATTRIB
+    STA sprite_player1 + SPRITE_ATTRIB
     LDA #128    ; X position
-    STA sprite_player + SPRITE_X
+    STA sprite_player1 + SPRITE_X
+	
+	; Write sprite data for sprite 1
+    LDA #120    ; Y position
+    STA sprite_player2 + SPRITE_Y
+    LDA #1      ; Tile number
+    STA sprite_player2 + SPRITE_TILE
+    LDA #0      ; Attributes
+    STA sprite_player2 + SPRITE_ATTRIB
+    LDA #136    ; X position
+    STA sprite_player2 + SPRITE_X
+	
+	; Write sprite data for sprite 2
+    LDA #128    ; Y position
+    STA sprite_player3 + SPRITE_Y
+    LDA #2      ; Tile number
+    STA sprite_player3 + SPRITE_TILE
+    LDA #0      ; Attributes
+    STA sprite_player3 + SPRITE_ATTRIB
+    LDA #128    ; X position
+    STA sprite_player3 + SPRITE_X
+	
+	; Write sprite data for sprite 3
+    LDA #128    ; Y position
+    STA sprite_player4 + SPRITE_Y
+    LDA #3      ; Tile number
+    STA sprite_player4 + SPRITE_TILE
+    LDA #0      ; Attributes
+    STA sprite_player4 + SPRITE_ATTRIB
+    LDA #136    ; X position
+    STA sprite_player4 + SPRITE_X
 
     ; Initialise enemies
     LDX #0
@@ -188,7 +221,7 @@ InitEnemies_LoopX:
     STA sprite_enemy+SPRITE_Y, x
     LDA #0
     STA sprite_enemy+SPRITE_ATTRIB, x
-    LDA #1
+    LDA #4
     STA sprite_enemy+SPRITE_TILE, x
     STA enemy_info+ENEMY_SPEED, x
     STA enemy_info+ENEMY_ALIVE, x
@@ -237,40 +270,89 @@ ReadController:
     LDA joypad1_state
     AND #BUTTON_RIGHT
     BEQ ReadRight_Done  ; if ((JOYPAD1 & 1) != 0) {
-    LDA sprite_player + SPRITE_X
+    LDA sprite_player1 + SPRITE_X
     CLC
     ADC #1
-    STA sprite_player + SPRITE_X
+    STA sprite_player1 + SPRITE_X
+	LDA sprite_player2 + SPRITE_X
+    CLC
+    ADC #1
+    STA sprite_player2 + SPRITE_X
+	LDA sprite_player3 + SPRITE_X
+    CLC
+    ADC #1
+    STA sprite_player3 + SPRITE_X
+	LDA sprite_player4 + SPRITE_X
+    CLC
+    ADC #1
+    STA sprite_player4 + SPRITE_X
 ReadRight_Done:         ; }
 
     ; React to Down button
     LDA joypad1_state
     AND #BUTTON_DOWN
     BEQ ReadDown_Done  ; if ((JOYPAD1 & 1) != 0) {
-    LDA sprite_player + SPRITE_Y
+    LDA sprite_player1 + SPRITE_Y
     CLC
     ADC #1
-    STA sprite_player + SPRITE_Y
+    STA sprite_player1 + SPRITE_Y
+	LDA sprite_player2 + SPRITE_Y
+    CLC
+    ADC #1
+    STA sprite_player2 + SPRITE_Y
+    LDA sprite_player3 + SPRITE_Y
+    CLC
+    ADC #1
+    STA sprite_player3 + SPRITE_Y
+    LDA sprite_player4 + SPRITE_Y
+    CLC
+    ADC #1
+    STA sprite_player4 + SPRITE_Y
+	
 ReadDown_Done:         ; }
 
     ; React to Left button
     LDA joypad1_state
     AND #BUTTON_LEFT
     BEQ ReadLeft_Done  ; if ((JOYPAD1 & 1) != 0) {
-    LDA sprite_player + SPRITE_X
+    LDA sprite_player1 + SPRITE_X
     SEC
     SBC #1
-    STA sprite_player + SPRITE_X
+    STA sprite_player1 + SPRITE_X
+	LDA sprite_player2 + SPRITE_X
+    SEC
+    SBC #1
+    STA sprite_player2 + SPRITE_X
+	LDA sprite_player3 + SPRITE_X
+    SEC
+    SBC #1
+    STA sprite_player3 + SPRITE_X
+	LDA sprite_player4 + SPRITE_X
+    SEC
+    SBC #1
+    STA sprite_player4 + SPRITE_X
 ReadLeft_Done:         ; }
 
     ; React to Up button
     LDA joypad1_state
     AND #BUTTON_UP
     BEQ ReadUp_Done  ; if ((JOYPAD1 & 1) != 0) {
-    LDA sprite_player + SPRITE_Y
+    LDA sprite_player1 + SPRITE_Y
     SEC
     SBC #1
-    STA sprite_player + SPRITE_Y
+    STA sprite_player1 + SPRITE_Y
+	LDA sprite_player2 + SPRITE_Y
+    SEC
+    SBC #1
+    STA sprite_player2 + SPRITE_Y
+	LDA sprite_player3 + SPRITE_Y
+    SEC
+    SBC #1
+    STA sprite_player3 + SPRITE_Y
+	LDA sprite_player4 + SPRITE_Y
+    SEC
+    SBC #1
+    STA sprite_player4 + SPRITE_Y
 ReadUp_Done:         ; }
 
     ; React to A button
@@ -283,13 +365,13 @@ ReadUp_Done:         ; }
     ; No bullet active, so spawn one
     LDA #1
     STA bullet_active
-    LDA sprite_player + SPRITE_Y    ; Y position
+    LDA sprite_player1 + SPRITE_Y    ; Y position
     STA sprite_bullet + SPRITE_Y
     LDA #2      ; Tile number
     STA sprite_bullet + SPRITE_TILE
     LDA #0      ; Attributes
     STA sprite_bullet + SPRITE_ATTRIB
-    LDA sprite_player + SPRITE_X    ; X position
+    LDA sprite_player1 + SPRITE_X    ; X position
     STA sprite_bullet + SPRITE_X
 ReadA_Done:
 
@@ -306,37 +388,6 @@ ReadA_Done:
     STA bullet_active
 UpdateBullet_Done:
 
-    ; Update enemies
-    LDX #(NUM_ENEMIES-1)*4
-UpdateEnemies_Loop:
-    ; Check if enemy is alive
-    LDA enemy_info+ENEMY_ALIVE, x
-    BNE UpdateEnemies_Start
-    JMP UpdateEnemies_Next
-UpdateEnemies_Start:
-    LDA sprite_enemy+SPRITE_X, x
-    CLC
-    ADC enemy_info+ENEMY_SPEED, x
-    STA sprite_enemy+SPRITE_X, x
-    CMP #256 - ENEMY_SPACING
-    BCS UpdateEnemies_Reverse
-    CMP #ENEMY_SPACING
-    BCC UpdateEnemies_Reverse
-    JMP UpdateEnemies_NoReverse
-UpdateEnemies_Reverse:
-    ; Reverse direction and descend
-    LDA #0
-    SEC
-    SBC enemy_info+ENEMY_SPEED, x
-    STA enemy_info+ENEMY_SPEED, x
-    LDA sprite_enemy+SPRITE_Y, x
-    CLC
-    ADC #ENEMY_DESCENT_SPEED
-    STA sprite_enemy+SPRITE_Y, x
-    LDA sprite_enemy+SPRITE_ATTRIB, x
-    EOR #%01000000
-    STA sprite_enemy+SPRITE_ATTRIB, x
-UpdateEnemies_NoReverse:
 
                                ;             \1        \2        \3            \4            \5            \6            \7
 CheckCollisionWithEnemy .macro ; parameters: object_x, object_y, object_hit_x, object_hit_y, object_hit_w, object_hit_h, no_collision_label
@@ -383,19 +434,12 @@ CheckCollisionWithEnemy .macro ; parameters: object_x, object_y, object_hit_x, o
 UpdateEnemies_NoCollision:
 
     ; Check collision with player
-    CheckCollisionWithEnemy sprite_player+SPRITE_X, sprite_player+SPRITE_Y, #0, #0, #8, #8, UpdateEnemies_NoCollisionWithPlayer
+    CheckCollisionWithEnemy sprite_player1+SPRITE_X, sprite_player1+SPRITE_Y, #0, #0, #8, #8, UpdateEnemies_NoCollisionWithPlayer
     ; Handle collision
     JSR InitialiseGame
     JMP UpdateEnemies_End
 UpdateEnemies_NoCollisionWithPlayer:
 
-UpdateEnemies_Next:
-    DEX
-    DEX
-    DEX
-    DEX
-    BMI UpdateEnemies_End
-    JMP UpdateEnemies_Loop
 UpdateEnemies_End:
 
     ; Copy sprite data to the PPU
@@ -416,6 +460,6 @@ UpdateEnemies_End:
 
 ; ---------------------------------------------------------------------------
 
-    ;.bank 2
-    ;.org $0000
-    ;.incbin "comp310.chr"
+    .bank 2
+    .org $0000
+    .incbin "spriteSheet.chr"
