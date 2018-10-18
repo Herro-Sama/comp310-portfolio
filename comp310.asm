@@ -166,6 +166,18 @@ InitialiseGame: ; Begin subroutine
     STA PPUDATA
     LDA #$3D
     STA PPUDATA
+	
+	 ; Write the background colour
+    LDA #$37
+    STA PPUDATA
+
+    ; Write the palette colours
+    LDA #$37
+    STA PPUDATA
+    LDA #$07
+    STA PPUDATA
+    LDA #$17
+    STA PPUDATA
 
     ; Write sprite data for sprite 0
     LDA #120    ; Y position
@@ -192,7 +204,7 @@ InitialiseGame: ; Begin subroutine
     STA sprite_player3 + SPRITE_Y
     LDA #2      ; Tile number
     STA sprite_player3 + SPRITE_TILE
-    LDA #0      ; Attributes
+    LDA #1      ; Attributes
     STA sprite_player3 + SPRITE_ATTRIB
     LDA #128    ; X position
     STA sprite_player3 + SPRITE_X
@@ -423,20 +435,20 @@ CheckCollisionWithEnemy .macro ; parameters: object_x, object_y, object_hit_x, o
     .endm
 
     ; Check collision with bullet
-    CheckCollisionWithEnemy sprite_bullet+SPRITE_X, sprite_bullet+SPRITE_Y, #BULLET_HITBOX_X, #BULLET_HITBOX_Y, #BULLET_HITBOX_WIDTH, #BULLET_HITBOX_HEIGHT, UpdateEnemies_NoCollision
+    ;CheckCollisionWithEnemy sprite_bullet+SPRITE_X, sprite_bullet+SPRITE_Y, #BULLET_HITBOX_X, #BULLET_HITBOX_Y, #BULLET_HITBOX_WIDTH, #BULLET_HITBOX_HEIGHT, UpdateEnemies_NoCollision
     ; Handle collision
-    LDA #0                        ; Destroy the bullet and the enemy
-    STA bullet_active
-    STA enemy_info+ENEMY_ALIVE, x
-    LDA #$FF
-    STA sprite_bullet+SPRITE_Y
-    STA sprite_enemy+SPRITE_Y, x
+    ;LDA #0                        ; Destroy the bullet and the enemy
+    ;STA bullet_active
+    ;STA enemy_info+ENEMY_ALIVE, x
+    ;LDA #$FF
+    ;STA sprite_bullet+SPRITE_Y
+    ;STA sprite_enemy+SPRITE_Y, x
 UpdateEnemies_NoCollision:
 
     ; Check collision with player
-    CheckCollisionWithEnemy sprite_player1+SPRITE_X, sprite_player1+SPRITE_Y, #0, #0, #8, #8, UpdateEnemies_NoCollisionWithPlayer
+    ;CheckCollisionWithEnemy sprite_player1+SPRITE_X, sprite_player1+SPRITE_Y, #0, #0, #8, #8, UpdateEnemies_NoCollisionWithPlayer
     ; Handle collision
-    JSR InitialiseGame
+    ;JSR InitialiseGame
     JMP UpdateEnemies_End
 UpdateEnemies_NoCollisionWithPlayer:
 
