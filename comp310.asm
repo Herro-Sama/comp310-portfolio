@@ -172,11 +172,11 @@ InitialiseGame: ; Begin subroutine
     STA PPUDATA
 
     ; Write the palette colours
-    LDA #$37
+    LDA #$20
     STA PPUDATA
     LDA #$07
     STA PPUDATA
-    LDA #$17
+    LDA #$10
     STA PPUDATA
 
     ; Write sprite data for sprite 0
@@ -204,7 +204,7 @@ InitialiseGame: ; Begin subroutine
     STA sprite_player3 + SPRITE_Y
     LDA #2      ; Tile number
     STA sprite_player3 + SPRITE_TILE
-    LDA #1      ; Attributes
+    LDA #0      ; Attributes
     STA sprite_player3 + SPRITE_ATTRIB
     LDA #128    ; X position
     STA sprite_player3 + SPRITE_X
@@ -379,9 +379,9 @@ ReadUp_Done:         ; }
     STA bullet_active
     LDA sprite_player1 + SPRITE_Y    ; Y position
     STA sprite_bullet + SPRITE_Y
-    LDA #2      ; Tile number
+    LDA #5      ; Tile number
     STA sprite_bullet + SPRITE_TILE
-    LDA #0      ; Attributes
+    LDA #1      ; Attributes
     STA sprite_bullet + SPRITE_ATTRIB
     LDA sprite_player1 + SPRITE_X    ; X position
     STA sprite_bullet + SPRITE_X
@@ -449,7 +449,7 @@ UpdateEnemies_NoCollision:
     ;CheckCollisionWithEnemy sprite_player1+SPRITE_X, sprite_player1+SPRITE_Y, #0, #0, #8, #8, UpdateEnemies_NoCollisionWithPlayer
     ; Handle collision
     ;JSR InitialiseGame
-    JMP UpdateEnemies_End
+    ;JMP UpdateEnemies_End
 UpdateEnemies_NoCollisionWithPlayer:
 
 UpdateEnemies_End:
