@@ -146,9 +146,6 @@ InitialiseGame: ; Begin subroutine
 	STA seed
 	LDA #$34
 	STA seed
-
-    LDA #0
-    STA jump_active
 	
     ; Reset the PPU high/low latch
     LDA PPUSTATUS
@@ -378,14 +375,13 @@ UpdateBullet_Done:
     BEQ ReadB_Done
     ; Perform a jump if one is not happening
     LDA jump_active
-    BCC ReadB_Done
-    LDA #1
-    STA jump_active
+    BNE ReadB_Done
     LDA #LOW(Jump_Speed)
     STA player_speed
     LDA #HIGH(Jump_Speed)
     STA player_speed+1
-	
+	LDA #1
+    STA jump_active
 	
 ReadB_Done:	
    LDA player_speed
@@ -422,8 +418,11 @@ updatePlayer_DoClamp:
    STA player_speed
    STA player_speed+1
    STA jump_active
+   JMP scroll_NoWrap
 
 updatePlayer_NoClamp: 
+	LDA #1
+	STA jump_active
 
 scroll_NoWrap:
 	LDA #02
@@ -448,9 +447,7 @@ scroll_NoGenerate:
     LDA #$02
     STA OAMDMA
 	
-	
 	LDA #0
-	STA jump_active
 
     RTI         ; Return from interrupt
 
