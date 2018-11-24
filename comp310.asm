@@ -1,21 +1,25 @@
+ ; ---------------------- Assigning Memory Bank Allocation --------------------------
+
+
     .inesprg 1
     .ineschr 1
     .inesmap 0
     .inesmir 1
 
-; ---------------------------------------------------------------------------
+; ----------------------- Assigning Variables ---------------------------
 
-PPUCTRL   = $2000
-PPUMASK   = $2001
-PPUSTATUS = $2002
-OAMADDR   = $2003
-OAMDATA   = $2004
-PPUSCROLL = $2005
-PPUADDR   = $2006
-PPUDATA   = $2007
-OAMDMA    = $4014
-JOYPAD1   = $4016
-JOYPAD2   = $4017
+PPUCTRL             = $2000
+PPUMASK             = $2001
+PPUSTATUS           = $2002
+OAMADDR             = $2003
+OAMDATA             = $2004
+PPUSCROLL           = $2005
+PPUADDR             = $2006
+PPUDATA             = $2007
+OAMDMA              = $4014
+APUFLAG             = $4015
+JOYPAD1             = $4016
+JOYPAD2             = $4017
 
 BUTTON_A      = %10000000
 BUTTON_B      = %01000000
@@ -49,14 +53,21 @@ SPRITE_TILE        .rs 1
 SPRITE_ATTRIB      .rs 1
 SPRITE_X           .rs 1
 
+sound_ptr          .rs 2
+current_song       .rs 1
+
 Gravity            = 10
 Jump_Speed         = -(2 * 256 + 64)
-screen_bottom_y    = 224 
+screen_bottom_y    = 232 
+
+
 
 
     .bank 0
-    .org $C000
+    .org $8000
+    .include "Sound_Engine.asm"
 
+; ----------------------- Reset ---------------------------
 ; Initialisation code based on https://wiki.nesdev.com/w/index.php/Init_code
 RESET:
     SEI        ; ignore IRQs
@@ -119,6 +130,11 @@ vblankwait2:
 
     ; End of initialisation code
 
+    JSR Sound_Initialise
+
+    LDA #$01
+    STA current_song
+
     JSR InitialiseGame
 
     LDA #%10000000 ; Enable NMI
@@ -127,18 +143,15 @@ vblankwait2:
     LDA #%00011000 ; Enable sprites and background
     STA PPUMASK
 	
-	LDA #0
+	LDA #1
 	STA PPUSCROLL ; Set X Scroll
 	LDA #0
 	STA PPUSCROLL ;Set Y Scroll
-	
-	
 
     ; Enter an infinite loop
 forever:
     JMP forever
-
-; ---------------------------------------------------------------------------
+; ----------------------- The inital allocation of memory for the first boot of the game and any resets -------------------------------
 
 InitialiseGame: ; Begin subroutine
 	; Seed RNG
@@ -214,15 +227,22 @@ InitialiseGame: ; Begin subroutine
 	LDA #$00
 	STA PPUADDR
 	
+    ; Load the name table data into memory
 	LDA #LOW(NameTableData)
 	STA nametable_address
 	LDA #HIGH(NameTableData)
 	STA nametable_address+1
+
+    ;Load Audio files
+    LDA #$01
+    JSR Sound_Load
 	
+
+    ; Load a counter into y and loop until y equals zero
 LoadNameTableData2_OuterLoop:	
 	LDY #7
 LoadNameTableData2_InnerLoop:
-	LDA [nametable_address], y
+	LDA (nametable_address), y
 	BEQ LoadNameTable2_End
 	STA PPUDATA
 	INY
@@ -241,12 +261,14 @@ LoadNameTable2_End:
 	LDA #%01000000
 	LDX #64
 	
+    ; Load and set attribute colours.
 loadAttributes2_Loop:
 	STA PPUDATA
 	DEX
 	BNE loadAttributes2_Loop		
 	
 	LDY #32
+
 InitialGeneration_Loop:
 	JSR GenerateFloor
 	DEY
@@ -329,10 +351,7 @@ ReadLeft_Done:         ; }
     LDA joypad1_state
     AND #BUTTON_UP
     BEQ ReadUp_Done  ; if ((JOYPAD1 & 1) != 0) {
-    LDA sprite_player + SPRITE_Y
-    SEC
-    SBC #1
-    STA sprite_player + SPRITE_Y
+    JSR LoadNewSong
 
 ReadUp_Done:         ; }
 
@@ -384,6 +403,8 @@ UpdateBullet_Done:
     STA jump_active
 	
 ReadB_Done:	
+
+; Apply gravity to the players speed pulling them down.
    LDA player_speed
    CLC
    ADC #LOW(Gravity)
@@ -392,6 +413,7 @@ ReadB_Done:
    ADC #HIGH(Gravity)
    STA player_speed+1
 
+; Set the players sprite position after it's been updated by the player_speed
    LDA player_position_sub
    CLC
    ADC player_speed
@@ -400,9 +422,11 @@ ReadB_Done:
    ADC player_speed+1
    STA sprite_player+SPRITE_Y
 
+; Check if the player is needs to be clamped to the floor.
    CMP #screen_bottom_y
    BCC updatePlayer_NoClamp
    
+
    LDA player_speed+1
    BMI updatePlayer_ToTop
    LDA #screen_bottom_y-1
@@ -440,13 +464,14 @@ scroll_NoGenerate:
 	ORA #%10000000
 	STA PPUCTRL
 	
-	
     ; Copy sprite data to the PPU
     LDA #0
     STA OAMADDR
     LDA #$02
     STA OAMDMA
-	
+
+    JSR Sound_Play_Frame
+
 	LDA #0
 
     RTI         ; Return from interrupt
@@ -471,12 +496,20 @@ prng_2:
 	RTS
 
 
-
-
-
-
-
 ; ---------------------------------------------------------------------------
+LoadNewSong:
+
+    INC current_song
+    LDA current_song
+    CMP #NUM_SONGS
+    BNE .done
+    LDA #$01
+    STA current_song
+.done:
+    LDA current_song
+    JSR Sound_Load
+    RTS
+
 
 GenerateFloor:
 
@@ -513,7 +546,7 @@ GenerateFloor_Loop:
 	AND #63
 	
 	RTS
-	
+	; The name table is setup to store all of the background sprite images.
 NameTableData:	
 	.db $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
 	.db $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
@@ -549,7 +582,7 @@ NameTableData:
 	.db $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
 	.db $05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05,$05
 	.db $00	
-	
+
 ; ---------------------------------------------------------------------------
 
     .bank 1
