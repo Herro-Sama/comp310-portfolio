@@ -1,8 +1,9 @@
+; -------------------------------- This code is based on the Nerdy Nights Audio Tutorials ----------------------------------------------
     .rsset $0300
-sound_disable_flag      .rs 1   
-sound_position          .rs 1 
-sound_frame_counter     .rs 1
+sound_disable_flag      .rs 1   ; A Boolean value used when audio is toggled on or off.
+sound_frame_counter     .rs 1   ; This is used to count how many frames into a track in frames the game is
 
+; The memory address in the APU for each of the sounds.
 SQU1_CTRL           = $4000
 SQU1_SWEEP          = $4001
 SQU1_LOW            = $4002
@@ -16,23 +17,28 @@ TRI_LOW             = $400A
 TRI_HIGH            = $400B
 NOISE_CTRL          = $400C
 
-stream_current_sound    .rs 6
-stream_status           .rs 6
-stream_channel          .rs 6
-stream_Volume_Duty      .rs 6
-stream_ptr_LOW          .rs 6
-stream_ptr_HIGH         .rs 6
-stream_Note_LOW         .rs 6
-stream_Note_HIGH        .rs 6
 
+; A large chunk of memory is reserved for the audio which is 
+stream_current_sound    .rs 6 ; Each of this has six registers assigned
+stream_status           .rs 6 ; This is because there are six possible sounds
+stream_channel          .rs 6 ; The sounds are Square 1 and 2, Triagnle and Noise
+stream_Volume_Duty      .rs 6 ; The Volume and Duty changes the volume or sharpness of the sound
+stream_ptr_LOW          .rs 6 ; This is used to tell which sound should be playing in the low register
+stream_ptr_HIGH         .rs 6 ; This is the same as above but only the first few bytes are used and the rest make up sound length
+stream_Note_LOW         .rs 6 ; This is the actual value which is stored for sound
+stream_Note_HIGH        .rs 6 ; This is again the same as above
+
+; These temp values are used to hold exact value the accumulator or x and y regusters are holding.
 sound_temp1             .rs 1
 sound_temp2             .rs 1
 
+; This is just used as short hand to make it easier to reference each type of sound.
 SQU1                = $00
 SQU2                = $01
 TRI                 = $02
 NOI                 = $03
 
+; These are used as reference when deciding what instruments should play and when.
 MUSIC_SQ1           = $00
 MUSIC_SQ2           = $01
 MUSIC_TRI           = $02
@@ -59,31 +65,33 @@ Sound_Initialise:
     STA TRI_CTRL
 
     LDA #$00
-    STA sound_disable_flag ;Clear the sound Disable flag
+    STA sound_disable_flag ; Clear the sound Disable flag
 
     RTS
 
+	; Disables all sound when called.
 Sound_Disable:
     LDA #$00
-    STA APUFLAG ;Disable all audio channels
+    STA APUFLAG ; Disable all audio channels
     LDA #$01
     STA sound_disable_flag
     RTS
 
+	; Load the sound file into RAM.
 Sound_Load:
-    STA sound_temp1
+    STA sound_temp1 ; Store the value of A into the accumulator in the event it's needed.
     ASL A
     TAY
-    LDA Song_Header, y
-    STA sound_ptr
+    LDA Song_Header, y ; Choose which song to load based on the y value.
+    STA sound_ptr ; Set the pointer to have the correct values for the appropriate song or sound effect.
     LDA Song_Header+1, y
     STA sound_ptr+1
 
-    LDY #$00
+    LDY #$00 ; Ensure that the sound pointer points to the start of the song.
     LDA [sound_ptr], y
     STA sound_temp2
     INY
-.loop:
+.loop:   ; loop through each of the sound components to ensure the values are set correctly from the data.
     LDA [sound_ptr], y
     TAX
     INY
@@ -108,6 +116,7 @@ Sound_Load:
     LDA [sound_ptr], y
     STA stream_ptr_HIGH, x
 
+	; This is called when the audio stream ends to load a new stream.
 .next_stream:
     INY
     LDA sound_temp1
@@ -117,6 +126,7 @@ Sound_Load:
     BNE .loop
     RTS
 
+	; This is called every frame to play sound and is needed for the audio to actually play if the audio isn't stopped.
 Sound_Play_Frame:
     LDA sound_disable_flag
     BNE .done
@@ -127,7 +137,7 @@ Sound_Play_Frame:
     BNE .done
 
     LDX #$00
-
+; This is used to make all the audio play provided it's supposed to.
 .loop:
     LDA stream_status, x
     AND #$01
@@ -147,6 +157,7 @@ Sound_Play_Frame:
 .done:
     RTS
 
+	; This is used to setup the audio processing unit ready to play sound.
 Set_APU:
     LDA stream_channel, x
     ASL A
@@ -168,14 +179,7 @@ Set_APU:
     LDA #0
     RTS    
 
-
-Sound_Pause:
-    STA sound_position
-
-
-Sound_UnPause:
-    LDA sound_position
-
+; This actually is used to get the correct audio files from RAM when needed.
 Fetch_Byte:
     LDA stream_ptr_LOW, x
     STA sound_ptr
@@ -218,6 +222,7 @@ Fetch_Byte:
     LDA #0
     RTS        
     
+	; The number of sounds their headers and the appropriate files needed to be included to allow them to work.
 NUM_SONGS = $04
 
 Song_Header:

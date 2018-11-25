@@ -1,3 +1,4 @@
+; This is the same as song0 but at a lower octave.
 Song2_Header:
     .byte $04
 
@@ -22,24 +23,23 @@ Song2_Header:
     .byte MUSIC_NOI
     .byte $00
 
-;Song taken from the Nerdy Night Sound Part 5: http://nintendoage.com/forum/messageview.cfm?catid=22&threadid=23452
 Song2_Square1:
-    .byte C4, G4, C4, C4, G4, G5, C4, C4     
-    .byte C4, G4, C4, C4, G4, G5, C4, C4 
-    .byte C4, G4, C4, C4, G4, G5, C4, C4    
-    .byte C4, G4, C4, C4, G4, G5, C4, C4    
+    .byte C1, G1, C1, C1, G1, G3, C1, C1     
+    .byte C1, G1, C1, C1, G1, G3, C1, C1 
+    .byte C1, G1, C1, C1, G1, G3, C1, C1    
+    .byte C1, G1, C1, C1, G1, G3, C1, C1    
     .byte $FF
     
 Song2_Square2:
-    .byte F4, C5, C4, A4, C4, C5, F4, C5 
-    .byte F4, C5, C4, A4, C4, C5, F4, C5        
-    .byte F4, C5, C4, A4, C4, C5, F4, C5
-    .byte F4, C5, C4, A4, C4, C5, F4, C5
+    .byte F1, C3, C1, A1, C1, C3, F1, C3 
+    .byte F1, C3, C1, A1, C1, C3, F1, C3        
+    .byte F1, C3, C1, A1, C1, C3, F1, C3
+    .byte F1, C3, C1, A1, C1, C3, F1, C3
     .byte $FF
     
 Song2_Triangle:
-    .byte D4, D3, D3, D4, D3, D3, D3, E3
-    .byte D4, D3, D3, D4, D3, D3, D3, E3
-    .byte D4, D3, D3, D4, D3, D3, D3, E3
-    .byte D4, D3, D3, D4, D3, D3, D3, E3
+    .byte D1, D2, D2, D1, D2, D2, D2, E2
+    .byte D1, D2, D2, D1, D2, D2, D2, E2
+    .byte D1, D2, D2, D1, D2, D2, D2, E2
+    .byte D1, D2, D2, D1, D2, D2, D2, E2
     .byte $FF

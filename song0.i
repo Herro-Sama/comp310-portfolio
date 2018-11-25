@@ -1,4 +1,5 @@
-;Blank File for no Audio
+; Song zero
+; Sets the values for the three insturments needed and cancles noise.
 
 Song0_Header:
     .byte $04
@@ -24,7 +25,7 @@ Song0_Header:
     .byte MUSIC_NOI
     .byte $00
 
-;Song taken from the Nerdy Night Sound Part 5: http://nintendoage.com/forum/messageview.cfm?catid=22&threadid=23452
+
 Song0_Square1:
     .byte C4, G4, C4, C4, G4, G5, C4, C4     
     .byte C4, G4, C4, C4, G4, G5, C4, C4 

@@ -1,3 +1,4 @@
+; Very short sound sequence.
 Song3_Header:
     .byte $04
 

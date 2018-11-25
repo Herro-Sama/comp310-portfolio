@@ -65,7 +65,7 @@ screen_bottom_y    = 232
 
     .bank 0
     .org $8000
-    .include "Sound_Engine.asm"
+    .include "Sound_Engine.asm" ; The Sound engine file is used to handle all audio requests.
 
 ; ----------------------- Reset ---------------------------
 ; Initialisation code based on https://wiki.nesdev.com/w/index.php/Init_code
@@ -130,7 +130,7 @@ vblankwait2:
 
     ; End of initialisation code
 
-    JSR Sound_Initialise
+    JSR Sound_Initialise ; This is used to make sure all audio is enabled
 
     LDA #$01
     STA current_song
@@ -233,7 +233,7 @@ InitialiseGame: ; Begin subroutine
 	LDA #HIGH(NameTableData)
 	STA nametable_address+1
 
-    ;Load Audio files
+    ;Load first audio file
     LDA #$01
     JSR Sound_Load
 	
@@ -351,7 +351,7 @@ ReadLeft_Done:         ; }
     LDA joypad1_state
     AND #BUTTON_UP
     BEQ ReadUp_Done  ; if ((JOYPAD1 & 1) != 0) {
-    JSR LoadNewSong
+    JSR LoadNewSong ; Change the song when the user presses the up button.
 
 ReadUp_Done:         ; }
 
@@ -432,11 +432,11 @@ ReadB_Done:
    LDA #screen_bottom_y-1
    JMP updatePlayer_DoClamp
 
-updatePlayer_ToTop:
+updatePlayer_ToTop: ; Clamp the player to the top of the screen if necessary
    LDA #0
 
 
-updatePlayer_DoClamp:
+updatePlayer_DoClamp: ; Clamps the player to the botom of the screen and resets their jump.
    STA sprite_player+SPRITE_Y
    LDA #0
    STA player_speed
@@ -476,7 +476,7 @@ scroll_NoGenerate:
 
     RTI         ; Return from interrupt
 
-; ---------------------------------------------------------------------------
+; ------------------------------Random Number Generator Literally Magic stuff from Ed's Videos -------------------------------
 
 prng:
 	LDX #8
@@ -496,10 +496,10 @@ prng_2:
 	RTS
 
 
-; ---------------------------------------------------------------------------
+; -----------------------Helper Functions called at various points -----------------------------------
 LoadNewSong:
 
-    INC current_song
+    INC current_song ; Loads the next sound to be played and then returns to the previous functions.
     LDA current_song
     CMP #NUM_SONGS
     BNE .done

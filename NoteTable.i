@@ -1,4 +1,5 @@
     ;This is a table of notes for use in making audio
+	; This is all the valies for notes layed out for quick reference by the NES.
  NoteTable:
     .word $760, $6F6, $659, $634, $5DB, $586, $537, $4EC, $4A5, $462, $423, $3E8 ; Octave Notes 1
     .word $3B0, $37B, $349, $319, $2ED, $2C3, $29B, $275, $252, $231, $211, $1F3 ; Octave Notes 2
@@ -10,6 +11,7 @@
     .word $00E, $00D, $00C, $00B, $00B, $00A, $009, $009, $008, $008             ; Octave Notes 8
 
 
+	;This is the actual notes used, this is to allow for easier use of notes when making songs of SFX.
 A1                  = $00
 Bd1                 = $01
 B1                  = $02
